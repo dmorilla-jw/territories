@@ -1,0 +1,21 @@
+[
+  {
+    "id": "LO-541",
+    "type": "In Person",
+    "status": "",
+    "area": "Los Osos",
+    "assigned_to": "David Morilla",
+    "date_due": "July 31, 2026",
+    "google_map_url": "https://maps.app.goo.gl/ip4iGV1QjrjyvGVZ9",
+    "map_embed_url": "",
+    "custom": [
+      "Costa Azul (Both Sides)",
+      "Nokomis (Both Sides)",
+      "Pecho Valley Rd. (E Side Only)",
+      "Seascape (1 House)",
+      "2750 Pecho Valley NTP",
+      "2760 Pecho Valley NTP"
+    ],
+    "working_notes": ""
+  }
+]
