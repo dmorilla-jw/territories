@@ -1,23 +1,23 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Territory Tool</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
 <h2>Territory Automation Tool</h2>
 
-<p>Upload your files:</p>
+<p><strong>Step 1: Upload Territories file</strong></p>
+<input type="file" id="territoriesFile">
+<p style="font-size: 12px; color: gray;">
+(File name usually contains: <b>Territories.csv</b>)
+</p>
 
-<input type="file" id="territoriesFile"><br><br>
-<input type="file" id="addressesFile"><br><br>
+<br>
+
+<p><strong>Step 2: Upload Territory Addresses file</strong></p>
+<input type="file" id="addressesFile">
+<p style="font-size: 12px; color: gray;">
+(File name usually contains: <b>Territory Addresses.csv</b>)
+</p>
+
+<br>
 
 <button onclick="processData()">Generate Do Not Call List</button>
 
+<hr>
+
 <div id="output"></div>
-
-<script src="script.js"></script>
-
-</body>
-</html>
