@@ -1,71 +1,62 @@
-// Read CSV file
-function readCSV(file, callback) {
-    const reader = new FileReader();
-    reader.onload = function (e) {
-        const text = e.target.result;
-        const rows = text.split('\n').map(r => r.split(','));
-        callback(rows);
-    };
-    reader.readAsText(file);
+function parseCSV(text) {
+    const rows = text.trim().split(/\r?\n/).map(row => row.split(","));
+    const headers = rows[0].map(h => h.trim());
+    return rows.slice(1).map(row => {
+        const obj = {};
+        headers.forEach((h, i) => obj[h] = row[i] ? row[i].trim() : "");
+        return obj;
+    });
 }
 
 let territoriesData = [];
 let addressesData = [];
 
-// Handle Territories.csv
-document.getElementById('territoriesFile').addEventListener('change', function (e) {
-    readCSV(e.target.files[0], function (data) {
-        territoriesData = data;
-        console.log("Territories loaded", territoriesData);
-    });
+function readFile(file, callback) {
+    const reader = new FileReader();
+    reader.onload = e => callback(parseCSV(e.target.result));
+    reader.readAsText(file);
+}
+
+document.getElementById("territoriesFile").addEventListener("change", e => {
+    readFile(e.target.files[0], data => territoriesData = data);
 });
 
-// Handle Territory Addresses.csv
-document.getElementById('addressesFile').addEventListener('change', function (e) {
-    readCSV(e.target.files[0], function (data) {
-        addressesData = data;
-        console.log("Addresses loaded", addressesData);
-    });
+document.getElementById("addressesFile").addEventListener("change", e => {
+    readFile(e.target.files[0], data => addressesData = data);
 });
 
-// Process + display
 function processData() {
-    if (territoriesData.length === 0 || addressesData.length === 0) {
+    if (!territoriesData.length || !addressesData.length) {
         alert("Please upload both files first.");
         return;
     }
 
-    let output = "";
-
-    // Skip headers
-    const addrRows = addressesData.slice(1);
+    const territoryLookup = {};
+    territoriesData.forEach(t => {
+        territoryLookup[t.TerritoryID] = `${t.CategoryCode}-${t.Number} ${t.Area || ""}`;
+    });
 
     const grouped = {};
 
-    addrRows.forEach(row => {
-        const territory = row[0];
-        const address = row[1];
-        const status = row[2];
+    addressesData.forEach(a => {
+        if (a.Status !== "DoNotCall") return;
 
-        if (!grouped[territory]) {
-            grouped[territory] = [];
-        }
+        const territoryName = territoryLookup[a.TerritoryID] || a.TerritoryID;
+        const address = `${a.Number || ""} ${a.Street || ""} ${a.Suburb || ""}`.trim();
 
-    if (status && status.toLowerCase().includes("do not call")) {
-        grouped[territory].push({
-            address: address,
-            status: status
-    });
-}
+        if (!grouped[territoryName]) grouped[territoryName] = [];
+        grouped[territoryName].push(address);
     });
 
-    for (let territory in grouped) {
+    let output = "";
+
+    Object.keys(grouped).sort().forEach(territory => {
         output += `<h3>${territory}</h3><ul>`;
-    grouped[territory].forEach(item => {
-        output += `<li>${item.address} (${item.status})</li>`;
+        grouped[territory].forEach(addr => {
+            output += `<li>${addr} (Do Not Call)</li>`;
+        });
+        output += `</ul>`;
     });
-        output += "</ul>";
-    }
 
     document.getElementById("output").innerHTML = output;
 }
