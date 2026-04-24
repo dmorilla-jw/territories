@@ -1,15 +1,10 @@
-function parseCSV(text) {
-    const rows = text.trim().split(/\r?\n/).map(row => row.split(","));
-    const headers = rows[0].map(h => h.trim());
-    return rows.slice(1).map(row => {
-        const obj = {};
-        headers.forEach((h, i) => obj[h] = row[i] ? row[i].trim() : "");
-        return obj;
-    });
-}
-
 let territoriesData = [];
 let addressesData = [];
+
+function parseCSV(text) {
+    const lines = text.trim().split(/\r?\n/);
+    return lines.map(line => line.split(","));
+}
 
 function readFile(file, callback) {
     const reader = new FileReader();
@@ -18,45 +13,39 @@ function readFile(file, callback) {
 }
 
 document.getElementById("territoriesFile").addEventListener("change", e => {
-    readFile(e.target.files[0], data => territoriesData = data);
+    readFile(e.target.files[0], data => {
+        territoriesData = data;
+        console.log("Territories loaded:", data);
+    });
 });
 
 document.getElementById("addressesFile").addEventListener("change", e => {
-    readFile(e.target.files[0], data => addressesData = data);
+    readFile(e.target.files[0], data => {
+        addressesData = data;
+        console.log("Addresses loaded:", data);
+    });
 });
 
 function processData() {
+    const outputDiv = document.getElementById("output");
+    outputDiv.innerHTML = "Processing...";
+
     if (!territoriesData.length || !addressesData.length) {
-        alert("Please upload both files first.");
+        outputDiv.innerHTML = "Please upload both files first.";
         return;
     }
 
-    const territoryLookup = {};
-    territoriesData.forEach(t => {
-        territoryLookup[t.TerritoryID] = `${t.CategoryCode}-${t.Number} ${t.Area || ""}`;
+    let output = "<h3>Do Not Call Addresses</h3><ul>";
+
+    addressesData.forEach(row => {
+        const rowText = row.join(" ");
+
+        if (rowText.toLowerCase().includes("donotcall") || rowText.toLowerCase().includes("do not call")) {
+            output += `<li>${rowText}</li>`;
+        }
     });
 
-    const grouped = {};
+    output += "</ul>";
 
-    addressesData.forEach(a => {
-        if (a.Status !== "DoNotCall") return;
-
-        const territoryName = territoryLookup[a.TerritoryID] || a.TerritoryID;
-        const address = `${a.Number || ""} ${a.Street || ""} ${a.Suburb || ""}`.trim();
-
-        if (!grouped[territoryName]) grouped[territoryName] = [];
-        grouped[territoryName].push(address);
-    });
-
-    let output = "";
-
-    Object.keys(grouped).sort().forEach(territory => {
-        output += `<h3>${territory}</h3><ul>`;
-        grouped[territory].forEach(addr => {
-            output += `<li>${addr} (Do Not Call)</li>`;
-        });
-        output += `</ul>`;
-    });
-
-    document.getElementById("output").innerHTML = output;
+    outputDiv.innerHTML = output;
 }
