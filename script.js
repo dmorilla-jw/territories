@@ -51,16 +51,19 @@ function processData() {
             grouped[territory] = [];
         }
 
-        if (status && status.toLowerCase().includes("do not call")) {
-            grouped[territory].push(address);
-        }
+    if (status && status.toLowerCase().includes("do not call")) {
+        grouped[territory].push({
+            address: address,
+            status: status
+    });
+}
     });
 
     for (let territory in grouped) {
         output += `<h3>${territory}</h3><ul>`;
-        grouped[territory].forEach(addr => {
-            output += `<li>${addr}</li>`;
-        });
+    grouped[territory].forEach(item => {
+        output += `<li>${item.address} (${item.status})</li>`;
+    });
         output += "</ul>";
     }
 
